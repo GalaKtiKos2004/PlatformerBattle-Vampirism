@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CircleCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 public class VampirismZone : MonoBehaviour
 {
@@ -14,17 +16,19 @@ public class VampirismZone : MonoBehaviour
 
     private SpriteRenderer _spriteRenderer;
 
+    private CircleCollider2D _circleCollider;
+
     private WaitForSeconds _cooldown;
 
     private Color _normalColor;
 
-    private Coroutine _vampirismCorutine;
-
     private bool _isVampir;
+    private bool _isCooldown;
 
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _circleCollider = GetComponent<CircleCollider2D>();
         _normalColor = _spriteRenderer.color;
         _cooldown = new WaitForSeconds(_cooldownTime);
         _isVampir = false;
@@ -40,20 +44,29 @@ public class VampirismZone : MonoBehaviour
         _playerInput.Vampiring -= StartVampirism;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private List<Fighter> GetPlayersInsideCircle()
     {
-        if (CanUseVampirism(collision, out Fighter fighter) == false)
+        Vector2 circleCenter = transform.position;
+        float circleRadius = _circleCollider.radius * transform.localScale.x;
+
+        List<Fighter> fighters = new List<Fighter>();
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(circleCenter, circleRadius);
+
+        Debug.Log(colliders.Length);
+
+        foreach (Collider2D collider in colliders)
         {
-            return;
+            if (IsEnemy(collider, out Fighter fighter))
+            {
+                fighters.Add(fighter);
+            }
         }
 
-        StartCoroutine(Vampirism());
-
-        fighter.TakeDamage(_damage * Time.deltaTime);
-        _playerFighter.TryAddHealth(_damage * Time.deltaTime);
+        return fighters;
     }
 
-    private bool CanUseVampirism(Collider2D collision, out Fighter fighter)
+    private bool IsEnemy(Collider2D collision, out Fighter fighter)
     {
         fighter = null;
 
@@ -62,12 +75,7 @@ public class VampirismZone : MonoBehaviour
             return false;
         }
 
-        if (!_isVampir)
-        {
-            return false;
-        }
-
-        if (!collision.TryGetComponent(out fighter))
+        if (collision.TryGetComponent(out fighter) == false)
         {
             return false;
         }
@@ -77,7 +85,10 @@ public class VampirismZone : MonoBehaviour
 
     private void StartVampirism()
     {
-        StartCoroutine(ActivateVampirismEffect());
+        if (_isCooldown == false && _isVampir == false)
+        {
+            StartCoroutine(ActivateVampirismEffect());
+        }
     }
 
     private IEnumerator ActivateVampirismEffect()
@@ -91,17 +102,27 @@ public class VampirismZone : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
 
+            foreach (Fighter fighter in GetPlayersInsideCircle())
+            {
+                fighter.TakeDamage(_damage * Time.deltaTime);
+                _playerFighter.TryAddHealth(_damage * Time.deltaTime);
+            }
+
             yield return null;
         }
 
         _spriteRenderer.color = _normalColor;
+        _isVampir = false;
+
+        StartCoroutine(VampirismCooldown());
     }
 
-    private IEnumerator Vampirism()
+    private IEnumerator VampirismCooldown()
     {
-        while (enabled)
-        {
-            yield return null;
-        }
+        _isCooldown = true;
+
+        yield return _cooldown;
+
+        _isCooldown = false;
     }
 }

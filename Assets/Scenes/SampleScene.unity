@@ -945,7 +945,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   _positionStarter: {fileID: 575364051}
 --- !u!114 &575364045
 MonoBehaviour:
@@ -2125,7 +2125,7 @@ MonoBehaviour:
   _playerInput: {fileID: 575364042}
   _vampirismTime: 6
   _cooldownTime: 3
-  _damage: 10
+  _damage: 4
 --- !u!58 &620621319
 CircleCollider2D:
   m_ObjectHideFlags: 0
