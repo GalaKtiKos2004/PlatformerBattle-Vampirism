@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,6 +25,11 @@ public class VampirismZone : MonoBehaviour
 
     private bool _isVampir;
     private bool _isCooldown;
+
+    public event Action VampirismStarted;
+
+    public float VampirismTime => _vampirismTime;
+    public float CooldownTime => _cooldownTime;
 
     private void Awake()
     {
@@ -88,6 +94,7 @@ public class VampirismZone : MonoBehaviour
         if (_isCooldown == false && _isVampir == false)
         {
             StartCoroutine(ActivateVampirismEffect());
+            VampirismStarted?.Invoke();
         }
     }
 
