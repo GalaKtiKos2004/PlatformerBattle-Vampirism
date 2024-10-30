@@ -1,22 +1,18 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
-[RequireComponent(typeof(Image))]
-public class VampirismView : MonoBehaviour
+public class VampirismView : BarView
 {
     [SerializeField] private VampirismZone _vampirismZone;
-
-    private Image _image;
 
     private float _minBarValue = 0f;
     private float _maxBarValue = 1f;
     private float _vampirismTime;
     private float _cooldownTime;
 
-    private void Awake()
+    protected override void Awake()
     {
-        _image = GetComponent<Image>();
+        base.Awake();
         _vampirismTime = _vampirismZone.VampirismTime;
         _cooldownTime = _vampirismZone.CooldownTime;
     }
@@ -31,25 +27,14 @@ public class VampirismView : MonoBehaviour
         _vampirismZone.VampirismStarted -= UpdateBar;
     }
 
-    private void UpdateBar()
+    protected void UpdateBar()
     {
         StartCoroutine(DecreaseBarSmoothly(_minBarValue, _vampirismTime));
     }
 
-    private IEnumerator DecreaseBarSmoothly(float targetValue, float smooothDecreaseDuration)
+    protected override IEnumerator DecreaseBarSmoothly(float targetValue, float smooothDecreaseDuration)
     {
-        float elapsedTime = 0f;
-        float previousValue = _image.fillAmount;
-
-        while (elapsedTime < smooothDecreaseDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float normalizedPosition = elapsedTime / smooothDecreaseDuration;
-            float intermediateValue = Mathf.Lerp(previousValue, targetValue, normalizedPosition);
-            _image.fillAmount = intermediateValue;
-
-            yield return null;
-        }
+        yield return base.DecreaseBarSmoothly(targetValue, smooothDecreaseDuration);
 
         if (targetValue == _minBarValue)
         {
