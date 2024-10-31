@@ -835,7 +835,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 575364030}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 07a8b5fd4338d0546ae14b35ad869f50, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2119,9 +2119,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _vampirColor: {r: 0.87058824, g: 0.39215687, b: 0.7529412, a: 0.36862746}
-  _enemyLayer:
-    serializedVersion: 2
-    m_Bits: 128
   _playerFighter: {fileID: 575364050}
   _playerInput: {fileID: 575364042}
   _vampirismTime: 6
@@ -2226,6 +2223,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62aa4b03f39bff64ba8654e897555b29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &654295670
 GameObject:
   m_ObjectHideFlags: 0
