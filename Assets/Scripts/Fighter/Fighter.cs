@@ -21,10 +21,7 @@ public abstract class Fighter : MonoBehaviour
         _health.Died += Die;
     }
 
-    public void TakeDamage(float damage)
-    {
-        _health.TakeDamage(damage);
-    }
+    public float TakeDamage(float damage) => _health.TakeDamage(damage);
 
     protected void CreateNewHealth()
     {

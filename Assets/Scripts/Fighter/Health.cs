@@ -15,16 +15,24 @@ public class Health
 
     public float CurrentHealth { get; private set; }
 
-    public void TakeDamage(float damage)
+    public float TakeDamage(float damage)
     {
-        CurrentHealth -= damage;
+        float recivedDamage;
+
+        if (CurrentHealth < damage)
+        {
+            recivedDamage = CurrentHealth;
+            Died?.Invoke();
+        }
+        else
+        {
+            CurrentHealth -= damage;
+            recivedDamage = damage;
+        }
 
         Changed?.Invoke(CurrentHealth, MaxHealth);
 
-        if (CurrentHealth <= 0)
-        {
-            Died?.Invoke();
-        }
+        return recivedDamage;
     }
 
     public bool TryTreated(float recoverHealth)

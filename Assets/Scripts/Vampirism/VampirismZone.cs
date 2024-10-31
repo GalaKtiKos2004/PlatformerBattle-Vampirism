@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CircleCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(EnemyDetector))]
 public class VampirismZone : MonoBehaviour
 {
     [SerializeField] private Color _vampirColor;
-    [SerializeField] private LayerMask _enemyLayer;
     [SerializeField] private Fighter _playerFighter;
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private float _vampirismTime;
@@ -20,6 +19,8 @@ public class VampirismZone : MonoBehaviour
     private CircleCollider2D _circleCollider;
 
     private WaitForSeconds _cooldown;
+
+    private EnemyDetector _enemyDetector;
 
     private Color _normalColor;
 
@@ -35,6 +36,7 @@ public class VampirismZone : MonoBehaviour
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _circleCollider = GetComponent<CircleCollider2D>();
+        _enemyDetector = GetComponent<EnemyDetector>();
         _normalColor = _spriteRenderer.color;
         _cooldown = new WaitForSeconds(_cooldownTime);
         _isVampir = false;
@@ -50,44 +52,7 @@ public class VampirismZone : MonoBehaviour
         _playerInput.Vampiring -= StartVampirism;
     }
 
-    private List<Fighter> GetPlayersInsideCircle()
-    {
-        Vector2 circleCenter = transform.position;
-        float circleRadius = _circleCollider.radius * transform.localScale.x;
 
-        List<Fighter> fighters = new List<Fighter>();
-
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(circleCenter, circleRadius);
-
-        Debug.Log(colliders.Length);
-
-        foreach (Collider2D collider in colliders)
-        {
-            if (IsEnemy(collider, out Fighter fighter))
-            {
-                fighters.Add(fighter);
-            }
-        }
-
-        return fighters;
-    }
-
-    private bool IsEnemy(Collider2D collision, out Fighter fighter)
-    {
-        fighter = null;
-
-        if ((_enemyLayer.value & (1 << collision.gameObject.layer)) == 0)
-        {
-            return false;
-        }
-
-        if (collision.TryGetComponent(out fighter) == false)
-        {
-            return false;
-        }
-
-        return true;
-    }
 
     private void StartVampirism()
     {
@@ -101,6 +66,7 @@ public class VampirismZone : MonoBehaviour
     private IEnumerator ActivateVampirismEffect()
     {
         float elapsedTime = 0f;
+        float recivedDamage;
 
         _spriteRenderer.color = _vampirColor;
         _isVampir = true;
@@ -109,10 +75,10 @@ public class VampirismZone : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
 
-            foreach (Fighter fighter in GetPlayersInsideCircle())
+            if (_enemyDetector.GetEnemyInsideCircle(_circleCollider, out Fighter fighter))
             {
-                fighter.TakeDamage(_damage * Time.deltaTime);
-                _playerFighter.TryAddHealth(_damage * Time.deltaTime);
+                recivedDamage = fighter.TakeDamage(_damage * Time.deltaTime);
+                _playerFighter.TryAddHealth(recivedDamage);
             }
 
             yield return null;
