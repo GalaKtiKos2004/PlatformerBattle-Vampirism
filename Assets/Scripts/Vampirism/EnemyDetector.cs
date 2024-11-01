@@ -12,10 +12,10 @@ public class EnemyDetector : MonoBehaviour
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(circleCenter, circleRadius, _enemyLayer);
 
-        Collider2D[] Sortedcolliders = colliders.OrderBy(collider => 
+        Collider2D[] sortedColliders = colliders.OrderBy(collider => 
                                         Vector2.SqrMagnitude(circleCenter - (Vector2)collider.transform.position)).ToArray();
 
-        foreach (Collider2D collider in Sortedcolliders)
+        foreach (Collider2D collider in sortedColliders)
         {
             if (collider.TryGetComponent(out Fighter fighter))
             {

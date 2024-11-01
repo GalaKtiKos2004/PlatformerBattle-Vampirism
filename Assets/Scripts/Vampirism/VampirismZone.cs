@@ -18,8 +18,6 @@ public class VampirismZone : MonoBehaviour
 
     private EnemyDetector _enemyDetector;
 
-    private Color _normalColor;
-
     private bool _isVampir;
     private bool _isCooldown;
 
@@ -30,9 +28,6 @@ public class VampirismZone : MonoBehaviour
     public event Action VampirismStarted;
     public event Action VampirismEnded;
     public event Action<float> ManaChanged;
-
-    public float VampirismTime => _vampirismTime;
-    public float CooldownTime => _cooldownTime;
 
     private void Awake()
     {
@@ -47,15 +42,15 @@ public class VampirismZone : MonoBehaviour
 
     private void OnEnable()
     {
-        _playerInput.Vampiring += StartVampirism;
+        _playerInput.Vampiring += TryStartVampirism;
     }
 
     private void OnDisable()
     {
-        _playerInput.Vampiring -= StartVampirism;
+        _playerInput.Vampiring -= TryStartVampirism;
     }
 
-    private void StartVampirism()
+    private void TryStartVampirism()
     {
         if (_isCooldown == false && _isVampir == false)
         {
@@ -80,7 +75,7 @@ public class VampirismZone : MonoBehaviour
 
             ManaChanged?.Invoke(_currentManaValue);
 
-            if (_enemyDetector.GetEnemyInsideCircle(_circleCollider, out Fighter fighter))
+            if (_enemyDetector.GetEnemyInsideCircle(_circleCollider, out Fighter fighter) && target == _minManaValue)
             {
                 recivedDamage = fighter.TakeDamage(_damage * Time.deltaTime);
                 _playerFighter.TryAddHealth(recivedDamage);
@@ -100,14 +95,5 @@ public class VampirismZone : MonoBehaviour
             _isCooldown = true;
             StartCoroutine(ToogleVampirism(_maxManaValue, _cooldownTime));
         }
-    }
-
-    private IEnumerator VampirismCooldown()
-    {
-        _isCooldown = true;
-
-        yield return _cooldown;
-
-        _isCooldown = false;
     }
 }
