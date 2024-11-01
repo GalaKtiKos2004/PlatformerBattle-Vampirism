@@ -14,8 +14,6 @@ public class VampirismZone : MonoBehaviour
 
     private CircleCollider2D _circleCollider;
 
-    private WaitForSeconds _cooldown;
-
     private EnemyDetector _enemyDetector;
 
     private bool _isVampir;
@@ -33,7 +31,6 @@ public class VampirismZone : MonoBehaviour
     {
         _circleCollider = GetComponent<CircleCollider2D>();
         _enemyDetector = GetComponent<EnemyDetector>();
-        _cooldown = new WaitForSeconds(_cooldownTime);
         _isVampir = false;
         _maxManaValue = 1f;
         _minManaValue = 0f;
@@ -54,12 +51,22 @@ public class VampirismZone : MonoBehaviour
     {
         if (_isCooldown == false && _isVampir == false)
         {
-            StartCoroutine(ToogleVampirism(_minManaValue, _vampirismTime));
+            StartCoroutine(ActivateVampirism(_minManaValue, _vampirismTime));
             VampirismStarted?.Invoke();
         }
     }
 
-    private IEnumerator ToogleVampirism(float target, float duration)
+    private void ManaTransition(ref float elapsedTime, float previousValue, float duration, float target)
+    {
+        elapsedTime += Time.deltaTime;
+
+        float normalizedPosition = elapsedTime / duration;
+        _currentManaValue = Mathf.Lerp(previousValue, target, normalizedPosition);
+
+        ManaChanged?.Invoke(_currentManaValue);
+    }
+
+    private IEnumerator ActivateVampirism(float target, float duration)
     {
         float recivedDamage;
         float elapsedTime = 0f;
@@ -69,11 +76,7 @@ public class VampirismZone : MonoBehaviour
 
         while (elapsedTime < duration)
         {
-            elapsedTime += Time.deltaTime;
-            float normalizedPosition = elapsedTime / duration;
-            _currentManaValue = Mathf.Lerp(previousValue, target, normalizedPosition);
-
-            ManaChanged?.Invoke(_currentManaValue);
+            ManaTransition(ref elapsedTime, previousValue, duration, target);
 
             if (_enemyDetector.GetEnemyInsideCircle(_circleCollider, out Fighter fighter) && target == _minManaValue)
             {
@@ -88,12 +91,24 @@ public class VampirismZone : MonoBehaviour
 
         VampirismEnded?.Invoke();
 
-        _isCooldown = false;
+        _isCooldown = true;
+        StartCoroutine(Colldown(_maxManaValue, _cooldownTime));
+    }
 
-        if (target == _minManaValue)
+    private IEnumerator Colldown(float target, float duration)
+    {
+        float elapsedTime = 0f;
+        float previousValue = _currentManaValue;
+
+        _isCooldown = true;
+
+        while (elapsedTime < duration)
         {
-            _isCooldown = true;
-            StartCoroutine(ToogleVampirism(_maxManaValue, _cooldownTime));
+            ManaTransition(ref elapsedTime, previousValue, duration, target);
+
+            yield return null;
         }
+
+        _isCooldown = false;
     }
 }

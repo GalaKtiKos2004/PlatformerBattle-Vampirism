@@ -2119,7 +2119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d14b082f58fa0994fb0b41194b62dbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _vampirColor: {r: 0.87058824, g: 0.39215687, b: 0.7529412, a: 0.36862746}
   _playerFighter: {fileID: 575364050}
   _playerInput: {fileID: 575364042}
   _vampirismTime: 6
