@@ -10,7 +10,7 @@ public class CharacterBootstraper : MonoBehaviour
     private Fighter _fighter;
     private Health _health;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _fighter = GetComponent<Fighter>();
         CreateNewHealth();

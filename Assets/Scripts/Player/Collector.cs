@@ -9,7 +9,6 @@ public class Collector : MonoBehaviour
     private void Awake()
     {
         _fighter = GetComponent<Fighter>();
-        _wallet = new Wallet();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -32,5 +31,10 @@ public class Collector : MonoBehaviour
         }
 
         collectable.Collect();
+    }
+
+    public void InitWallet(Wallet wallet)
+    {
+        _wallet = wallet;
     }
 }
